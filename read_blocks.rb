@@ -66,7 +66,7 @@ class Transaction
     load_tx(blockfile)
   end
   
-  attr_reader :transaction_version, :input_count, :inputs, :output_count, :outputs
+  attr_reader :transaction_version, :input_count, :inputs, :output_count, :outputs, :lock_time
 
   def load_tx blockfile
     @transaction_version = get_unsigned_int(blockfile)
@@ -87,9 +87,8 @@ class Transaction
       @outputs << Output.new(blockfile)
     end
     
-    lock_time = get_unsigned_int(blockfile)
-    raise "Bad Lock Time #{lock_time}" if lock_time != 0
-    puts "\tLOCK TIME #{lock_time}"
+    @lock_time = get_unsigned_int(blockfile)
+    raise "Bad Lock Time #{@lock_time}" if @lock_time != 0
   end
 
 end
@@ -160,5 +159,7 @@ while !blockfile.eof?
       puts "\tCHALLENGE SCRIPT LENGTH #{output.challenge_script_length}"
       puts "\tCHALLENGE SCRIPT #{output.challenge_script}"
     end
+
+    puts "LOCK TIME #{tx.lock_time}"
   end
 end
