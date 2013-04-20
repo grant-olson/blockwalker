@@ -17,46 +17,52 @@ def get_hash f
 end
 
 def get_variable_int f
-  f.read(1).unpack("C")[0]
+  int = f.read(1).unpack("C")[0]
+  raise "VARIABLE INT TOO BIG" if (int >= 0xfd)
+  int
 end
 
 def get_tx blockfile
   tx_version = get_unsigned_int(blockfile)
   raise "BAD TX VERSION" if tx_version != 1
 
-  inputs = get_variable_int(blockfile)
-  puts "\tINPUTS #{inputs}"
+  input_counts = get_variable_int(blockfile)
+  puts "\tINPUT_COUNTS #{input_counts}"
 
-  input_hash = get_hash(blockfile)
-  puts "\tINPUT HASH #{input_hash}"
+  1.upto(input_counts) do
+    input_hash = get_hash(blockfile)
+    puts "\t\tINPUT HASH #{input_hash}"
 
-  input_tx_index = get_signed_int(blockfile)
-  puts "\tINPUT TX INDEX #{input_tx_index}"
-  raise "AAA" if input_tx_index != -1
+    input_tx_index = get_signed_int(blockfile)
+    puts "\t\tINPUT TX INDEX #{input_tx_index}"
 
-  response_script_length = get_variable_int(blockfile)
-  puts "\tRESPONSE SCRIPT LENGTH #{response_script_length}"
+    response_script_length = get_variable_int(blockfile)
+    puts "\tRESPONSE SCRIPT LENGTH #{response_script_length}"
 
-  response_script = blockfile.read(response_script_length).unpack("H#{response_script_length}")
-  puts "\tRESPONSE SCRIPT #{response_script}"
+    response_script = blockfile.read(response_script_length).unpack("H#{response_script_length}")
+    puts "\tRESPONSE SCRIPT #{response_script}"
 
-  sequence_number = get_signed_int(blockfile)
-  puts "\tSEQUENCE NUMBER #{sequence_number}"
+    sequence_number = get_signed_int(blockfile)
+    puts "\tSEQUENCE NUMBER #{sequence_number}"
+  end
+
 
   output_count = get_variable_int(blockfile)
   puts "\tOUTPUT COUNT #{output_count}"
 
-  output_value = get_unsigned_int_64(blockfile)
-  puts "\tOUTPUT VALUE #{output_value}"
+  1.upto(output_count) do
+    output_value = get_unsigned_int_64(blockfile)
+    puts "\t\tOUTPUT VALUE #{output_value}"
 
-  challenge_script_length = get_variable_int(blockfile)
-  puts "\tCHALLENGE SCRIPT LENGTH #{challenge_script_length}"
+    challenge_script_length = get_variable_int(blockfile)
+    puts "\tCHALLENGE SCRIPT LENGTH #{challenge_script_length}"
 
-  challenge_script = blockfile.read(challenge_script_length).unpack("H#{challenge_script_length}")
-  puts "\tCHALLENGE SCRIPT #{challenge_script}"
-
+    challenge_script = blockfile.read(challenge_script_length).unpack("H#{challenge_script_length}")
+    puts "\tCHALLENGE SCRIPT #{challenge_script}"
+  end
+  
   lock_time = get_unsigned_int(blockfile)
-  raise "AAA" if lock_time != 0
+  raise "Bad Lock Time #{lock_time}" if lock_time != 0
   puts "\tLOCK TIME #{lock_time}"
 end
 
@@ -89,7 +95,11 @@ def get_block blockfile
   tx_count = get_variable_int(blockfile)
   puts "TX #{tx_count}"
 
-  1.upto(tx_count) { get_tx(blockfile) }
+  1.upto(tx_count) do
+    puts "\tTX NUMBER #{tx_count}"
+    get_tx(blockfile)
+  end
+  
 end
 
 blockfile = File.open("blocks/blk00000.dat")
