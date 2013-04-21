@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.files = ["LICENSE",
              "lib/blockwalker.rb",
 	     "lib/blockwalker/readers.rb",
+	     "lib/blockwalker/script.rb",
 	     "lib/blockwalker/input.rb",
 	     "lib/blockwalker/output.rb",
 	     "lib/blockwalker/transaction.rb",

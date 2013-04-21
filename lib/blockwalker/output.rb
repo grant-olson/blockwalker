@@ -1,4 +1,5 @@
 require 'blockwalker/readers'
+require 'blockwalker/script'
 
 module BlockWalker
   class Output
@@ -13,7 +14,7 @@ module BlockWalker
     def load_output(blockfile)
       @output_value = get_unsigned_int_64(blockfile)
       @challenge_script_length = get_variable_int(blockfile)
-      @challenge_script = blockfile.read(@challenge_script_length).unpack("H#{challenge_script_length}")[0]
+      @challenge_script = BlockWalker::Script.new(blockfile.read(@challenge_script_length))
     end
   end
 end

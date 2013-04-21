@@ -18,8 +18,16 @@ module BlockWalker
 
     def get_variable_int f
       int = f.read(1).unpack("C")[0]
-      raise "VARIABLE INT TOO BIG #{int}" if (int >= 0xfd)
-      int
+
+      if int < 0xFD
+        int
+      elsif int == 0xFD
+        f.read(2).unpack("S<")[0]
+      elsif int == 0xFE
+        get_unsigned_int(f)
+      else
+        raise "malformed variable int #{int}"
+      end
     end
   end
 end
