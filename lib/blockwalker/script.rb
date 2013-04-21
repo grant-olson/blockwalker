@@ -112,11 +112,10 @@ module BlockWalker
       process_script(script_data)
     end
 
-    def push opcode, rest
-      size = opcode
+    def push size, rest, push_type=:OP_PUSH
       push_data = rest[0..size-1].unpack("H#{size}")
       rest = rest[size..-1]
-      @ops << [:PUSH, push_data]
+      @ops << [push_type, push_data]
       rest
     end
 
@@ -126,6 +125,18 @@ module BlockWalker
 
       if opcode >= 0x01 and opcode <= 0x4b
         rest = push(opcode, rest)
+      elsif opcode == 0x4c
+        size = rest[0].unpack("C")[0]
+        rest = rest[1..-1]
+        rest = push(size, rest, :OP_PUSHDATA1)
+      elsif opcode == 0x4c
+        size = rest[0..1].unpack("S>")[0]
+        rest = rest[2..-1]
+        rest = push(size, rest, :OP_PUSHDATA2)
+      elsif opcode == 0x4c
+        size = rest[0..3].unpack("L>")[0]
+        rest = rest[4..-1]
+        rest = push(size, rest, :OP_PUSHDATA4)
       elsif OPS.has_key? opcode
         @ops << [OPS[opcode]]
       else
